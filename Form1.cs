@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Threading;
+using System.Drawing.Drawing2D;
 
 namespace Laba4_algorithms
 {
@@ -15,6 +16,7 @@ namespace Laba4_algorithms
     {
         public static Bitmap bmp;
         public bool ctrlPress = false;
+        const int r = 20;
         public Form1()
         {
             InitializeComponent();
@@ -24,6 +26,102 @@ namespace Laba4_algorithms
         {
             Graphics g = Graphics.FromImage(bmp);
             g.DrawLine(pen, A.get_x(), A.get_y(), B.get_x(), B.get_y());
+        }
+
+        public static void draw_line1(Pen pen, CCircle A, CCircle B)
+        {
+            Graphics g = Graphics.FromImage(bmp);
+            //Pen pen1 = new Pen(Color.FromArgb(255, 0, 0, 255), 6);
+            Pen pen1 = new Pen(Color.Blue, 1);
+            //pen1.StartCap = LineCap.ArrowAnchor;
+            pen1.CustomEndCap = new AdjustableArrowCap(5,20);
+
+            //pen1.EndCap = LineCap.RoundAnchor;
+            int delta_y = A.get_y() - B.get_y();
+            int delta_x = A.get_x() - B.get_x();
+            double RR = (delta_x * delta_x + delta_y * delta_y) / 1.0;
+            double R = (int)( Math.Sqrt(delta_x * delta_x + delta_y * delta_y) );
+            double sin = delta_y/R;
+            double cos = delta_x / R;
+            //g.DrawLine(pen1, A.get_x(), A.get_y(), B.get_x()- (int)(r * cos), B.get_y()-(int)(r*sin));
+            g.DrawLine(pen1, A.get_x(), A.get_y(), B.get_x(), B.get_y());
+
+        }
+
+        public void dfs(int v, int[] color,int num_of_edg, int[,] g, int[,]p)
+        {
+            int n=1;
+            int to; // to - номер вершины, в которую собираемся пойти
+            color[v] = 1;
+            int from = 0;
+            int k = 0;
+            for (int i = 0; i < num_of_edg; i++)
+            {
+                if (g[i,0] == v)
+                {
+                    to = g[i,1];
+                    if (color[to] == 0)
+                    {
+                        p[n,0] = g[i,0]; p[n,1] = g[i,1]; 
+                        from = v;
+                        dfs(to, color, num_of_edg, g, p);
+                        while (p[n,1] != v)       
+                            n--;
+                        n++;
+                    }
+                    else if (color[to] == 1)
+                    {
+
+                        p[n,0] = g[i,0]; p[n,1] = g[i,1];
+                        k = n;
+                        while (p[k,0] != to)
+                        {
+                            label1.Text += (p[k, 0]).ToString()+'-'+p[k, 1].ToString() + '\n';
+                            k--;
+                        }
+
+                        label1.Text += (p[k, 0]).ToString() + '-' + p[k, 1].ToString() + ' ';
+                        n--;
+
+                    }
+                }
+            }
+            if (v == 0) color[v] = 2;
+            else
+                if (color[from] == 1)
+                color[v] = 0;
+            else color[v] = 2;
+
+
+
+        }     
+        private void button2_Click(object sender, EventArgs e)
+        {
+            int num_of_edg = 0;
+            int num_of_vert = Globals.n;
+            for (int i = 0; i < Globals.n; ++i)
+                for (int j = 0; j < Globals.n; ++j)
+                    if (Matrix.Rows[i].Cells[j].Value != null) num_of_edg++;
+
+            int[,] g = new int[num_of_edg, 2];
+            int ii = 0;
+            for (int i = 0; i < Globals.n; ++i)
+                for (int j = 0; j < Globals.n; ++j)
+                    if (Matrix.Rows[i].Cells[j].Value != null) {
+                        g[ii, 0] = Convert.ToInt32(Matrix.Rows[i].HeaderCell.Value);
+                        g[ii, 1] = Convert.ToInt32(Matrix.Columns[j].HeaderText); 
+                    }
+
+
+            int[,] p = new int[num_of_edg, 2];
+
+
+            int[] color = {0, 0, 0, 0, 0}; // цвета вершин
+
+            for (int i = 0; i < num_of_vert; i++)
+                if (color[i] == 0)
+                    dfs(i,color, num_of_edg,g,p);
+
         }
 
         public void Wait(double seconds)
@@ -85,17 +183,17 @@ namespace Laba4_algorithms
                 {
                     if (k > -1)
                     {
-                        draw_line(Globals.redline, Globals.arr_circles.st[Globals.versh], Globals.arr_circles.st[k]);
-                        Globals.arr_circles.st[k].highlight(k);
+                        //draw_line1(Globals.redline, Globals.arr_circles.st[Globals.versh], Globals.arr_circles.st[k]);
+                        //Globals.arr_circles.st[k].highlight(k);
                         //изменения в матрице смежности
-                        Matrix.Rows[k].Cells[Globals.versh].Value = 1;
+                        //Matrix.Rows[k].Cells[Globals.versh].Value = 1;
                         Matrix.Rows[Globals.versh].Cells[k].Value = 1;
                         //через небольшой промежуток времени
                         //Thread.Sleep(3000);
                         //ThreadPool.QueueUserWorkItem(Worker);
                         //Worker(pictureBox1);
                         //Wait(0.5);
-                        draw_line(Globals.blueline, Globals.arr_circles.st[Globals.versh], Globals.arr_circles.st[k]);
+                        draw_line1(Globals.blueline, Globals.arr_circles.st[Globals.versh], Globals.arr_circles.st[k]);
                         Globals.arr_circles.st[Globals.versh].draw(Globals.versh);
                         Globals.arr_circles.st[Globals.versh].non_highlight(Globals.versh);
                         Globals.arr_circles.st[k].draw(k);
@@ -133,6 +231,8 @@ namespace Laba4_algorithms
         {
             //pictureBox1.Image = bmp;
         }
+
+   
     }
     //public static class Globals
     //{
@@ -153,6 +253,9 @@ namespace Laba4_algorithms
         public static SolidBrush blueBrush = new SolidBrush(Color.Blue);
         public static SolidBrush redBrush = new SolidBrush(Color.Red);
         public static Storage arr_circles = new Storage();
+        //public static Pen edge_with_arrow = new Pen(Color.Blue, 2);
+        //edge_with_arrow.StartCap = LineCap.ArrowAnchor;
+
     }
 
 
