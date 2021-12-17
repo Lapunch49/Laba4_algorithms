@@ -17,22 +17,31 @@ namespace Laba4_algorithms
         public static Bitmap bmp;
         public bool ctrlPress = false;
         const int r = 20;
-        private static Pen redcircleline = new Pen(Color.Red, 2);
-        private static Pen bluecircleline = new Pen(Color.Blue, 2);
-        private static Pen redline = new Pen(Color.Red, 2);
-        private static Pen blueline = new Pen(Color.Blue, 2);
         private static int versh = -1;//для отметки выделенности одной вершины
         private static int n = 0;//количество элементов в хранилище arr_circles.st
-        private static SolidBrush blueBrush = new SolidBrush(Color.Blue);
-        private static SolidBrush redBrush = new SolidBrush(Color.Red);
         private static Storage arr_circles = new Storage();
-        //public static Pen edge_with_arrow = new Pen(Color.Blue, 2);
-        //edge_with_arrow.StartCap = LineCap.ArrowAnchor;
 
         public Form1()
         {
             InitializeComponent();
             bmp = new Bitmap(pictureBox1.Width, pictureBox1.Height);
+        }
+
+        private int new_tmp(int tmp, Queue<int> Och, List<int> Lst)
+        {
+            bool fl = false;
+            tmp = Och.Dequeue();
+            foreach (int i in Lst)
+            {
+                if (i == tmp) fl = true;
+            }
+            if (fl && Och.Count != 0)
+            {
+                tmp = new_tmp(tmp, Och, Lst); fl = false;
+            }
+            if (fl==false)
+                return tmp;
+            else return -1;
         }
         public static void draw_line( Pen pen, CCircle A, CCircle B)
         {
@@ -40,49 +49,71 @@ namespace Laba4_algorithms
             g.DrawLine(pen, A.get_x(), A.get_y(), B.get_x(), B.get_y());
         }
 
-        private void button2_Click(object sender, EventArgs e)
+        private void btn_bfs_Click(object sender, EventArgs e) //BFS
         {
+            //определяем количество вершин и дуг
             int num_of_edg = 0;
             int num_of_vert = n;
             for (int i = 0; i < n; ++i)
                 for (int j = 0; j < n; ++j)
-                    if (Matrix.Rows[i].Cells[j].Value != null) num_of_edg++;
-
-            int[,] g = new int[num_of_edg, 2];
+                    if ((Matrix.Rows[i].Cells[j].Value) != null) num_of_edg++;
+            //формирование списка смежности
+            int[,] adj_list = new int[num_of_edg, 2];//список смежности
             int ii = 0;
             for (int i = 0; i < n; ++i)
                 for (int j = 0; j < n; ++j)
                     if (Matrix.Rows[i].Cells[j].Value != null) {
-                        g[ii, 0] = Convert.ToInt32(Matrix.Rows[i].HeaderCell.Value);
-                        g[ii, 1] = Convert.ToInt32(Matrix.Columns[j].HeaderText); 
+                        adj_list[ii, 0] = Convert.ToInt32(Matrix.Rows[i].HeaderCell.Value);
+                        adj_list[ii++, 1] = Convert.ToInt32(Matrix.Columns[j].HeaderText); 
                     }
-
-
-            int[,] p = new int[num_of_edg, 2];
-
-
-            int[] color = {0, 0, 0, 0, 0}; // цвета вершин
-
-            for (int i = 0; i < num_of_vert; i++)
-                if (color[i] == 0) ;
-                    //dfs(i,color, num_of_edg,g,p);
-
-        }
-
-        public void Wait(double seconds)
-        {
-            int ticks = System.Environment.TickCount + (int)Math.Round(seconds * 1000.0);
-            while (System.Environment.TickCount < ticks)
+            //очередь и список
+            Queue <int> Och = new Queue <int>();
+            List<int> Lst = new List<int>();
+            //определяем начальную вершину
+            int st_vert = 1; // По умолчанию
+            string number = textBox1.Text;
+            if (number.Length>0)
+                if(Char.IsDigit(number[0]))
+                    {
+                        st_vert = int.Parse(number[0].ToString());
+                    }
+            if (number.Length > 1)
             {
-                Application.DoEvents();
+                if (Char.IsDigit(number[1]))
+                {
+                    st_vert = (st_vert)*10 + int.Parse(number[1].ToString());
+                } else
+                {
+                    st_vert = 1;
+                }
+            }
+            //Поиск в ширину
+            int tmp = st_vert;
+            Och.Enqueue(tmp);
+            while (Och.Count!=0 || tmp>=0)
+            {
+                for (int i = 0; i < num_of_edg; ++i)
+                {
+                    if (adj_list[i, 0] == tmp)
+                    {
+                        Och.Enqueue(adj_list[i, 1]);
+                    }
+                }
+                Lst.Add(tmp);//добавили в лист
+                //присваиваем след значение tmp
+                if (Och.Count != 0)
+                    tmp = new_tmp(tmp, Och, Lst);
+            }
+            //вывод листа - сформированного списка вершин
+            label2.Text = "";
+            foreach (int i in Lst)
+            {
+                label2.Text += (i).ToString();
+                if (i != Lst[Lst.Count-1])
+                    label2.Text += "->";
             }
         }
-        private void Worker(object ignored)
-        {
-            //Run first query
-            Thread.Sleep(1000);
-            //Run second query etc.
-        }
+       
         private void pictureBox1_MouseDown(object sender, MouseEventArgs e)
         {
             int k = -1;
@@ -105,7 +136,16 @@ namespace Laba4_algorithms
                     {
                         Matrix.Columns.Add((n).ToString(), (n).ToString());
                         Matrix.Columns[n-1].Width = 70;  //задаем размер новому столбцу
-                        Matrix.Rows.Add("", "");
+                        Matrix.Rows.Add(null, null);
+                        for(int i=0; i < n; ++i)
+                            for (int j=0; j<n; ++j)
+                            {
+                                if (Matrix.Rows[i].Cells[j].Value != Matrix.Rows[j].Cells[i].Value)
+                                {
+                                    //Matrix.Rows[i].Cells[j].Value = 1;
+                                    Matrix.Rows[j].Cells[i].Value = Matrix.Rows[i].Cells[j].Value;
+                                }
+                            }
                     }
                     //заполняем заголовки строк
                     for (int i = 0; (i <= (Matrix.Rows.Count - 1)); i++)
@@ -128,17 +168,11 @@ namespace Laba4_algorithms
                 {
                     if (k > -1)
                     {
-                        //draw_line(redline, arr_circles.st[versh], arr_circles.st[k]);
-                        //arr_circles.st[k].highlight(k);
                         //изменения в матрице смежности
                         Matrix.Rows[k].Cells[versh].Value = 1;
                         Matrix.Rows[versh].Cells[k].Value = 1;
-                        //через небольшой промежуток времени
-                        //Thread.Sleep(3000);
-                        //ThreadPool.QueueUserWorkItem(Worker);
-                        //Worker(pictureBox1);
-                        //Wait(0.5);
-                        draw_line(blueline, arr_circles.st[versh], arr_circles.st[k]);
+                        //рисуем дугу и убираем выделение вершины
+                        draw_line(Globals.blueline, arr_circles.st[versh], arr_circles.st[k]);
                         arr_circles.st[versh].draw(versh);
                         arr_circles.st[versh].non_highlight(versh);
                         arr_circles.st[k].draw(k);
@@ -149,35 +183,31 @@ namespace Laba4_algorithms
             }
             pictureBox1.Image = bmp;
         }
-        private void pictureBox1_MouseMove(object sender, MouseEventArgs e)
-        {
-            //for (int i=0; i < n; ++i)
-            //{
 
-            //}
-        }
-
-        private void button1_Click(object sender, EventArgs e)
+        private void btn_clear_Click(object sender, EventArgs e)
         {
             arr_circles.set_count_to_zero();
             pictureBox1.Image = null;
             bmp = new Bitmap(pictureBox1.Width, pictureBox1.Height);
+            //очищаем таблицу - стираем все значения в матрице
             //for (int i = 0; i < n; ++i)
             //    for (int j = 0; j < n; ++j)
             //        Matrix.Rows[i].Cells[j].Value = "";
+            //удаляем все колонки и столбцы
             Matrix.Rows.Clear();
             Matrix.Columns.Clear();
             n = 0;
             Matrix.Columns.Add(0.ToString(), 1.ToString());
             Matrix.Columns[0].Width = 70;  //задаем размер новому столбцу
+            //очищаем поле ввода и вывода
+            textBox1.Text = "";
+            label2.Text = "";
         }
 
         private void pictureBox1_Paint(object sender, PaintEventArgs e)
         {
             //pictureBox1.Image = bmp;
         }
-
-   
     }
     public static class Globals
     {
@@ -185,14 +215,8 @@ namespace Laba4_algorithms
         public static Pen bluecircleline = new Pen(Color.Blue, 2);
         public static Pen redline = new Pen(Color.Red,2);
         public static Pen blueline = new Pen(Color.Blue, 2);
-        public static int versh = -1;//для отметки выделенности одной вершины
-        public static int n = 0;//количество элементов в хранилище arr_circles.st
         public static SolidBrush blueBrush = new SolidBrush(Color.Blue);
         public static SolidBrush redBrush = new SolidBrush(Color.Red);
-        public static Storage arr_circles = new Storage();
-        //public static Pen edge_with_arrow = new Pen(Color.Blue, 2);
-        //edge_with_arrow.StartCap = LineCap.ArrowAnchor;
-
     }
 
 

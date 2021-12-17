@@ -5,7 +5,6 @@ using System.Drawing;
 
 namespace Laba4_algorithms
 {
-    
     public class CCircle
     {
         private int x, y, r;
