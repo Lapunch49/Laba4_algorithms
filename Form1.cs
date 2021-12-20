@@ -17,6 +17,7 @@ namespace Laba4_algorithms
         public static Bitmap bmp;
         public bool ctrlPress = false;
         const int r = 20;
+        int n = 0;
         public Form1()
         {
             InitializeComponent();
@@ -46,97 +47,104 @@ namespace Laba4_algorithms
             //g.DrawLine(pen1, A.get_x(), A.get_y(), B.get_x()- (int)(r * cos), B.get_y()-(int)(r*sin));
             g.DrawLine(pen1, A.get_x(), A.get_y(), B.get_x(), B.get_y());
 
-        }
-
-        public void dfs(int v, int[] color,int num_of_edg, int[,] g, int[,]p)
+        }   
+        private void form_matr_adj(bool[,] matr_adj)
         {
-            int n=1;
-            int to; // to - номер вершины, в которую собираемся пойти
-            color[v] = 1;
-            int from = 0;
-            int k = 0;
-            for (int i = 0; i < num_of_edg; i++)
+            for (int i = 0; i < n; ++i)
+                for (int j = 0; j < n; ++j)
+                    if (Matrix.Rows[i].Cells[j].Value != null)
+                        matr_adj[i, j] = true;
+                    else matr_adj[i, j] = false;
+        }
+        private bool check_vert(int versh, bool[,] matr_adj, List<int> del_list)//false - если не надо удалять 
+        {
+            //проверка на нахождение в списке уже удаленных
+            foreach (int j in del_list)
+                if (versh == j)
+                    return false;
+            //иначе проверяем вершину на необходимость удаления по матрице смежности
+            bool fl = false; //false - нет единиц в строке/столбце - нет исх/вход ребер у versh
+            //проверка, есть ли у вершины исходящее ребро
+            for (int i = 0; i < n; ++i)
+                if (matr_adj[versh, i] != false) 
+                    fl = true;
+
+            if (fl == false) //если нет исх. ребер
+                return true; //выходим из функ, с меткой удаления вершины
+            fl = false; //"обнуляем" значение fl для проверки столбца
+            //проверка, есть ли у вершины входящее ребро
+            for (int i = 0; i < n; ++i)
+                if (matr_adj[i, versh] != false)
+                    fl = true;
+            if (fl == false) //если нет исх. ребер
+                return true;
+            return false;
+        }
+        private void del_vert(int versh, bool[,] matr_adj, Queue<int>och, List<int> del_list) //псевдо-удаление вершины
+        {
+            //псевдоудаляем вершину из матрицы смежности
+            for (int i = 0; i < n; ++i)
             {
-                if (g[i,0] == v)
+                //если у вершины есть смежные - помещаем их в очередь и псевдоудаляем ребро м/у ними
+                if (matr_adj[versh, i] != false) {
+                    och.Enqueue(i);
+                    matr_adj[versh, i] = false; 
+                }
+                if (matr_adj[i, versh] != false)
                 {
-                    to = g[i,1];
-                    if (color[to] == 0)
+                    och.Enqueue(i);
+                    matr_adj[i, versh] = false;
+                }
+            }
+            //помещаем вершину в список удаленных
+            del_list.Add(versh);
+        }
+        private bool acyclicity(bool[,] matr_adj, Queue<int> och, List<int> del_list)
+        {
+            //функция проверки на ацикличность: false - циклов нет
+            for (int i = 0; i < n; ++i)
+            {
+                if (check_vert(i, matr_adj, del_list))
+                {
+                    del_vert(i, matr_adj, och, del_list);
+                }
+                //проверяем элементы из очереди
+                while (och.Count() != 0)
+                {
+                    int j = och.Dequeue();
+                    if (check_vert(j, matr_adj, del_list))
                     {
-                        p[n,0] = g[i,0]; p[n,1] = g[i,1]; 
-                        from = v;
-                        dfs(to, color, num_of_edg, g, p);
-                        while (p[n,1] != v)       
-                            n--;
-                        n++;
-                    }
-                    else if (color[to] == 1)
-                    {
-
-                        p[n,0] = g[i,0]; p[n,1] = g[i,1];
-                        k = n;
-                        while (p[k,0] != to)
-                        {
-                            label1.Text += (p[k, 0]).ToString()+'-'+p[k, 1].ToString() + '\n';
-                            k--;
-                        }
-
-                        label1.Text += (p[k, 0]).ToString() + '-' + p[k, 1].ToString() + ' ';
-                        n--;
-
+                        del_vert(j, matr_adj, och, del_list);
                     }
                 }
             }
-            if (v == 0) color[v] = 2;
-            else
-                if (color[from] == 1)
-                color[v] = 0;
-            else color[v] = 2;
-
-
-
-        }     
-        private void button2_Click(object sender, EventArgs e)
+            //если все вершины в списке удаленных - циклов нет
+            if (del_list.Count() == n) return false;
+            else return true;
+        }
+        private void btn_no_cycles_Click(object sender, EventArgs e)
         {
             int num_of_edg = 0;
-            int num_of_vert = Globals.n;
-            for (int i = 0; i < Globals.n; ++i)
-                for (int j = 0; j < Globals.n; ++j)
-                    if (Matrix.Rows[i].Cells[j].Value != null) num_of_edg++;
-
-            int[,] g = new int[num_of_edg, 2];
-            int ii = 0;
-            for (int i = 0; i < Globals.n; ++i)
-                for (int j = 0; j < Globals.n; ++j)
-                    if (Matrix.Rows[i].Cells[j].Value != null) {
-                        g[ii, 0] = Convert.ToInt32(Matrix.Rows[i].HeaderCell.Value);
-                        g[ii, 1] = Convert.ToInt32(Matrix.Columns[j].HeaderText); 
-                    }
-
-
-            int[,] p = new int[num_of_edg, 2];
-
-
-            int[] color = {0, 0, 0, 0, 0}; // цвета вершин
-
-            for (int i = 0; i < num_of_vert; i++)
-                if (color[i] == 0)
-                    dfs(i,color, num_of_edg,g,p);
-
-        }
-
-        public void Wait(double seconds)
-        {
-            int ticks = System.Environment.TickCount + (int)Math.Round(seconds * 1000.0);
-            while (System.Environment.TickCount < ticks)
-            {
-                Application.DoEvents();
+            int num_of_vert = n;
+            //считаем количество ребер
+            for (int i = 0; i < n; ++i) {
+                if (Matrix.Rows[i].Cells[i].Value != null)
+                    Matrix.Rows[i].Cells[i].Value = null;
+                for (int j = 0; j < n; ++j)
+                    if (Matrix.Rows[i].Cells[j].Value != null) num_of_edg++; 
             }
-        }
-        private void Worker(object ignored)
-        {
-            //Run first query
-            Thread.Sleep(1000);
-            //Run second query etc.
+            //список "псевдо-удаленных" вершин 
+            List<int> del_list = new List<int>();
+            //очередь, в которую попадают вершины, смежные с ново-удаленной
+            Queue<int> och = new Queue<int>();
+            //создание матрицы смежности
+            bool[,] matr_adj = new bool[n, n];
+            form_matr_adj(matr_adj);
+            //проверка на ацикличность - работа со сформированной матрицей смежности
+            bool cycle = acyclicity(matr_adj, och, del_list);
+            if (!cycle)
+                label1.Text = "There is no cycles in your graph";
+            else label1.Text = "There are cycles in your graph";
         }
         private void pictureBox1_MouseDown(object sender, MouseEventArgs e)
         {
@@ -154,12 +162,12 @@ namespace Laba4_algorithms
                     //создаем новый круг и рисуем его
                     Globals.arr_circles.add(new CCircle(e.X, e.Y));
                     Globals.arr_circles.st[Globals.arr_circles.get_count()-1].draw(Globals.arr_circles.get_count() - 1);
-                    Globals.n++;
+                    n++;
                     //добавляем столбцы и строки
-                    if (Globals.n > 1)
+                    if (n > 1)
                     {
-                        Matrix.Columns.Add((Globals.n).ToString(), (Globals.n).ToString());
-                        Matrix.Columns[Globals.n-1].Width = 70;  //задаем размер новому столбцу
+                        Matrix.Columns.Add((n).ToString(), (n).ToString());
+                        Matrix.Columns[n-1].Width = 70;  //задаем размер новому столбцу
                         Matrix.Rows.Add("", "");
                     }
                     //заполняем заголовки строк
@@ -183,16 +191,8 @@ namespace Laba4_algorithms
                 {
                     if (k > -1)
                     {
-                        //draw_line1(Globals.redline, Globals.arr_circles.st[Globals.versh], Globals.arr_circles.st[k]);
-                        //Globals.arr_circles.st[k].highlight(k);
                         //изменения в матрице смежности
-                        //Matrix.Rows[k].Cells[Globals.versh].Value = 1;
                         Matrix.Rows[Globals.versh].Cells[k].Value = 1;
-                        //через небольшой промежуток времени
-                        //Thread.Sleep(3000);
-                        //ThreadPool.QueueUserWorkItem(Worker);
-                        //Worker(pictureBox1);
-                        //Wait(0.5);
                         draw_line1(Globals.blueline, Globals.arr_circles.st[Globals.versh], Globals.arr_circles.st[k]);
                         Globals.arr_circles.st[Globals.versh].draw(Globals.versh);
                         Globals.arr_circles.st[Globals.versh].non_highlight(Globals.versh);
@@ -204,15 +204,8 @@ namespace Laba4_algorithms
             }
             pictureBox1.Image = bmp;
         }
-        private void pictureBox1_MouseMove(object sender, MouseEventArgs e)
-        {
-            //for (int i=0; i < Globals.n; ++i)
-            //{
 
-            //}
-        }
-
-        private void button1_Click(object sender, EventArgs e)
+        private void btn_clear_Click(object sender, EventArgs e)
         {
             Globals.arr_circles.set_count_to_zero();
             pictureBox1.Image = null;
@@ -222,9 +215,11 @@ namespace Laba4_algorithms
             //        Matrix.Rows[i].Cells[j].Value = "";
             Matrix.Rows.Clear();
             Matrix.Columns.Clear();
-            Globals.n = 0;
+            n = 0;
             Matrix.Columns.Add(0.ToString(), 1.ToString());
             Matrix.Columns[0].Width = 70;  //задаем размер новому столбцу
+            //очищаем место для вывода
+            label1.Text = "";
         }
 
         private void pictureBox1_Paint(object sender, PaintEventArgs e)
@@ -249,7 +244,7 @@ namespace Laba4_algorithms
         public static Pen redline = new Pen(Color.Red,2);
         public static Pen blueline = new Pen(Color.Blue, 2);
         public static int versh = -1;//для отметки выделенности одной вершины
-        public static int n = 0;//количество элементов в хранилище arr_circles.st
+        //public static int n = 0;//количество элементов в хранилище arr_circles.st
         public static SolidBrush blueBrush = new SolidBrush(Color.Blue);
         public static SolidBrush redBrush = new SolidBrush(Color.Red);
         public static Storage arr_circles = new Storage();
