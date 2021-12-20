@@ -56,7 +56,11 @@ namespace Laba4_algorithms
             int num_of_vert = n;
             for (int i = 0; i < n; ++i)
                 for (int j = 0; j < n; ++j)
+                {
+                    if (Matrix.Rows[i].Cells[i].Value != null)
+                        Matrix.Rows[i].Cells[i].Value = null;
                     if ((Matrix.Rows[i].Cells[j].Value) != null) num_of_edg++;
+                }
             //формирование списка смежности
             int[,] adj_list = new int[num_of_edg, 2];//список смежности
             int ii = 0;
@@ -64,7 +68,7 @@ namespace Laba4_algorithms
                 for (int j = 0; j < n; ++j)
                     if (Matrix.Rows[i].Cells[j].Value != null) {
                         adj_list[ii, 0] = Convert.ToInt32(Matrix.Rows[i].HeaderCell.Value);
-                        adj_list[ii++, 1] = Convert.ToInt32(Matrix.Columns[j].HeaderText); 
+                        adj_list[ii++, 1] = Convert.ToInt32(Matrix.Columns[j].HeaderText);
                     }
             //очередь и список
             Queue <int> Och = new Queue <int>();
@@ -113,7 +117,6 @@ namespace Laba4_algorithms
                     label2.Text += "->";
             }
         }
-       
         private void pictureBox1_MouseDown(object sender, MouseEventArgs e)
         {
             int k = -1;
@@ -142,7 +145,6 @@ namespace Laba4_algorithms
                             {
                                 if (Matrix.Rows[i].Cells[j].Value != Matrix.Rows[j].Cells[i].Value)
                                 {
-                                    //Matrix.Rows[i].Cells[j].Value = 1;
                                     Matrix.Rows[j].Cells[i].Value = Matrix.Rows[i].Cells[j].Value;
                                 }
                             }
