@@ -31,13 +31,15 @@ namespace Laba4_algorithms
         {
             return y;
         }
-
         public void draw(int i)
         {
             Graphics g = Graphics.FromImage(Form1.bmp);
-            g.FillEllipse(Globals.blueBrush, x - r, y - r, r * 2, r * 2);
-            g.DrawString((i+1).ToString(), new Font(FontFamily.GenericSansSerif, 10,
-            FontStyle.Regular), new SolidBrush(Color.White), x-r/2, y-r/2);
+            if (x != 0 && y != 0)
+            {
+                g.FillEllipse(Globals.blueBrush, x - r, y - r, r * 2, r * 2);
+                g.DrawString((i + 1).ToString(), new Font(FontFamily.GenericSansSerif, 10,
+                FontStyle.Regular), new SolidBrush(Color.White), x - r / 2, y - r / 2);
+            }
         }
 
         public void highlight(int i)

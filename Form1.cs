@@ -17,16 +17,34 @@ namespace Laba4_algorithms
         public static Bitmap bmp;
         public bool ctrlPress = false;
         const int r = 20;
-        int n = 0;
+        int n = 0;        
+        bool[,] matr_adj_copy;
+        List<int> del_list_copy;
+        int sought = -1; //искомая вершина
         public Form1()
         {
             InitializeComponent();
             bmp = new Bitmap(pictureBox1.Width, pictureBox1.Height);
         }
-        public static void draw_line( Pen pen, CCircle A, CCircle B)
+        public static void draw_line(Pen pen, CCircle A, CCircle B)
         {
             Graphics g = Graphics.FromImage(bmp);
             g.DrawLine(pen, A.get_x(), A.get_y(), B.get_x(), B.get_y());
+        }
+
+        private bool[,] copy (bool[,] obj){
+            bool[,] res = new bool[n, n];
+            for (int i = 0; i < n; ++i)
+                for (int j = 0; j < n; ++j)
+                    res[i, j] = obj[i, j];
+            return res;
+        }
+        private List<int> copy(List<int> obj)
+        {
+            List<int> res = new List<int>();
+            for (int i = 0; i < obj.Count(); ++i)
+                res.Add(obj[i]);
+            return res;
         }
 
         public static void draw_line1(Pen pen, CCircle A, CCircle B)
@@ -52,7 +70,7 @@ namespace Laba4_algorithms
         {
             for (int i = 0; i < n; ++i)
                 for (int j = 0; j < n; ++j)
-                    if (Matrix.Rows[i].Cells[j].Value != null)
+                    if (Matrix.Rows[i].Cells[j].Value != null && (Matrix.Rows[i].Cells[j].Value).ToString() == "1")
                         matr_adj[i, j] = true;
                     else matr_adj[i, j] = false;
         }
@@ -123,16 +141,7 @@ namespace Laba4_algorithms
             else return true;
         }
         private void btn_no_cycles_Click(object sender, EventArgs e)
-        {
-            int num_of_edg = 0;
-            int num_of_vert = n;
-            //считаем количество ребер
-            for (int i = 0; i < n; ++i) {
-                if (Matrix.Rows[i].Cells[i].Value != null)
-                    Matrix.Rows[i].Cells[i].Value = null;
-                for (int j = 0; j < n; ++j)
-                    if (Matrix.Rows[i].Cells[j].Value != null) num_of_edg++; 
-            }
+        { 
             //список "псевдо-удаленных" вершин 
             List<int> del_list = new List<int>();
             //очередь, в которую попадают вершины, смежные с ново-удаленной
@@ -143,11 +152,52 @@ namespace Laba4_algorithms
             //проверка на ацикличность - работа со сформированной матрицей смежности
             bool cycle = acyclicity(matr_adj, och, del_list);
             if (!cycle)
+            {
                 label1.Text = "There is no cycles in your graph";
-            else label1.Text = "There are cycles in your graph";
+                btn_del_vert.Visible = false;
+            }
+            else
+            {
+                label1.Text = "Your graph is cyclical ";
+                //запоминаем состояние до удаление вершины
+                matr_adj_copy = copy(matr_adj);
+                del_list_copy = copy(del_list);
+                //искомая вершина
+                bool fl = false; // если не в списке удаленных
+                for (int i = 0; i < n; ++i)
+                {
+                    fl = false;
+                    foreach (int j in del_list_copy)
+                        if (i == j)  //правильно ли сработает
+                            fl = true; //или return;
+                    if (fl == false)
+                    {
+                        del_vert(i, matr_adj_copy, och, del_list_copy);
+                        och.Clear();
+                        cycle = acyclicity(matr_adj_copy, och, del_list_copy);
+                        if (!cycle) { sought = i; break; }
+                        else
+                        {
+                            matr_adj_copy = copy(matr_adj);
+                            del_list_copy = copy(del_list);
+                        }
+                    }
+                }
+                if (sought == -1)
+                {
+                    label1.Text += "and there is no way to escape cyclicality with deleting one vertex";
+                    btn_del_vert.Visible = false;
+                }
+                else
+                {
+                    label1.Text += ("and there is a way to escape it with deleting vertex №" + (sought + 1).ToString());
+                    btn_del_vert.Visible = true;
+                }
+            }
         }
         private void pictureBox1_MouseDown(object sender, MouseEventArgs e)
         {
+            label1.Text = "";
             int k = -1;
             //проверяем попал ли курсор по какому-либо кругу
             for (int i = 0; i < Globals.arr_circles.get_count(); ++i)
@@ -168,7 +218,13 @@ namespace Laba4_algorithms
                     {
                         Matrix.Columns.Add((n).ToString(), (n).ToString());
                         Matrix.Columns[n-1].Width = 70;  //задаем размер новому столбцу
-                        Matrix.Rows.Add("", "");
+                        Matrix.Rows.Add("","");
+                        //меняем местами последние строки
+                        for (int i=0; i<n; ++i)
+                        {
+                            Matrix.Rows[n - 2].Cells[i].Value = Matrix.Rows[n - 1].Cells[i].Value;
+                            Matrix.Rows[n - 1].Cells[i].Value = null;
+                        }
                     }
                     //заполняем заголовки строк
                     for (int i = 0; (i <= (Matrix.Rows.Count - 1)); i++)
@@ -227,16 +283,45 @@ namespace Laba4_algorithms
             //pictureBox1.Image = bmp;
         }
 
-   
+        private void btn_aboutPr_Click(object sender, EventArgs e)
+        {
+            About_program frm = new About_program();
+            frm.Show();
+        }
+
+        private void btn_task_Click(object sender, EventArgs e)
+        {
+            Task frm = new Task();
+            frm.Show();
+        }
+
+        private void btn_del_vert_Click(object sender, EventArgs e)
+        {
+            Pen pen = new Pen(Color.Blue, 1);
+            pen.CustomEndCap = new AdjustableArrowCap(5, 20);
+
+            pictureBox1.Image = null;
+            bmp = new Bitmap(pictureBox1.Width, pictureBox1.Height);
+
+            Globals.arr_circles.del(sought);
+            for (int i=0; i<n; ++i)
+            {
+                Matrix.Rows[sought].Cells[i].Value = null;
+                Matrix.Rows[i].Cells[sought].Value = null;
+
+            }
+            for (int i = 0; i < n; ++i)
+            {
+                if (Globals.arr_circles.get_el(i) != null)
+                    Globals.arr_circles.get_el(i).draw(i);
+            }
+            for (int i = 0; i < n; ++i)
+                for (int j = 0; j < n; ++j)
+                    if (Matrix.Rows[i].Cells[j].Value != null && (Matrix.Rows[i].Cells[j].Value).ToString() == "1")
+                        draw_line1(pen, Globals.arr_circles.get_el(i), Globals.arr_circles.get_el(j));
+            pictureBox1.Image = bmp;
+        }
     }
-    //public static class Globals
-    //{
-    //    public static Pen circle = new Pen(Color.Blue, 20);
-    //    public static Pen line = new Pen(Color.Blue);
-    //    public static Point[] arr_points = new Point[50];
-    //    public static int n = 0;
-    //    public static int versh = -1;
-    //}
     public static class Globals
     {
         public static Pen redcircleline = new Pen(Color.Red, 2);

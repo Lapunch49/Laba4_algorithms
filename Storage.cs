@@ -39,12 +39,7 @@ namespace Laba4_algorithms
                 st = st_;
             }
         }
-        public void del(int ind)
-        {
-            for (int i = ind; i < k - 1; ++i)
-                st[i] = st[i + 1];
-            k = k - 1;
-        }
+
         public void set_count_to_zero()
         {
             k = 0;
@@ -52,6 +47,14 @@ namespace Laba4_algorithms
         public CCircle get_el(int ind)
         {
             return st[ind];
+        } 
+        public void del(int ind)
+        {
+            st[ind] = new CCircle();
+            //st[ind] = null;
+            //for (int i = ind; i < k - 1; ++i)
+            //    st[i] = st[i + 1];
+            //k = k - 1;
         }
         public int get_count()
         {
