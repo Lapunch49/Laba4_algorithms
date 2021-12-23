@@ -29,9 +29,11 @@ namespace Laba4_algorithms
         public static void draw_line(Pen pen, CCircle A, CCircle B)
         {
             Graphics g = Graphics.FromImage(bmp);
-            g.DrawLine(pen, A.get_x(), A.get_y(), B.get_x(), B.get_y());
-        }
+            Pen pen1 = new Pen(Color.Blue, 1);
+            pen1.CustomEndCap = new AdjustableArrowCap(5,20);
+            g.DrawLine(pen1, A.get_x(), A.get_y(), B.get_x(), B.get_y());
 
+        }  
         private bool[,] copy (bool[,] obj){
             bool[,] res = new bool[n, n];
             for (int i = 0; i < n; ++i)
@@ -46,26 +48,6 @@ namespace Laba4_algorithms
                 res.Add(obj[i]);
             return res;
         }
-
-        public static void draw_line1(Pen pen, CCircle A, CCircle B)
-        {
-            Graphics g = Graphics.FromImage(bmp);
-            //Pen pen1 = new Pen(Color.FromArgb(255, 0, 0, 255), 6);
-            Pen pen1 = new Pen(Color.Blue, 1);
-            //pen1.StartCap = LineCap.ArrowAnchor;
-            pen1.CustomEndCap = new AdjustableArrowCap(5,20);
-
-            //pen1.EndCap = LineCap.RoundAnchor;
-            int delta_y = A.get_y() - B.get_y();
-            int delta_x = A.get_x() - B.get_x();
-            double RR = (delta_x * delta_x + delta_y * delta_y) / 1.0;
-            double R = (int)( Math.Sqrt(delta_x * delta_x + delta_y * delta_y) );
-            double sin = delta_y/R;
-            double cos = delta_x / R;
-            //g.DrawLine(pen1, A.get_x(), A.get_y(), B.get_x()- (int)(r * cos), B.get_y()-(int)(r*sin));
-            g.DrawLine(pen1, A.get_x(), A.get_y(), B.get_x(), B.get_y());
-
-        }   
         private void form_matr_adj(bool[,] matr_adj)
         {
             for (int i = 0; i < n; ++i)
@@ -162,7 +144,6 @@ namespace Laba4_algorithms
                 //запоминаем состояние до удаление вершины
                 matr_adj_copy = copy(matr_adj);
                 del_list_copy = copy(del_list);
-                //искомая вершина
                 bool fl = false; // если не в списке удаленных
                 for (int i = 0; i < n; ++i)
                 {
@@ -249,7 +230,7 @@ namespace Laba4_algorithms
                     {
                         //изменения в матрице смежности
                         Matrix.Rows[Globals.versh].Cells[k].Value = 1;
-                        draw_line1(Globals.blueline, Globals.arr_circles.st[Globals.versh], Globals.arr_circles.st[k]);
+                        draw_line(Globals.blueline, Globals.arr_circles.st[Globals.versh], Globals.arr_circles.st[k]);
                         Globals.arr_circles.st[Globals.versh].draw(Globals.versh);
                         Globals.arr_circles.st[Globals.versh].non_highlight(Globals.versh);
                         Globals.arr_circles.st[k].draw(k);
@@ -266,9 +247,6 @@ namespace Laba4_algorithms
             Globals.arr_circles.set_count_to_zero();
             pictureBox1.Image = null;
             bmp = new Bitmap(pictureBox1.Width, pictureBox1.Height);
-            //for (int i = 0; i < Globals.n; ++i)
-            //    for (int j = 0; j < Globals.n; ++j)
-            //        Matrix.Rows[i].Cells[j].Value = "";
             Matrix.Rows.Clear();
             Matrix.Columns.Clear();
             n = 0;
@@ -276,11 +254,6 @@ namespace Laba4_algorithms
             Matrix.Columns[0].Width = 70;  //задаем размер новому столбцу
             //очищаем место для вывода
             label1.Text = "";
-        }
-
-        private void pictureBox1_Paint(object sender, PaintEventArgs e)
-        {
-            //pictureBox1.Image = bmp;
         }
 
         private void btn_aboutPr_Click(object sender, EventArgs e)
@@ -294,7 +267,6 @@ namespace Laba4_algorithms
             Task frm = new Task();
             frm.Show();
         }
-
         private void btn_del_vert_Click(object sender, EventArgs e)
         {
             Pen pen = new Pen(Color.Blue, 1);
@@ -318,7 +290,7 @@ namespace Laba4_algorithms
             for (int i = 0; i < n; ++i)
                 for (int j = 0; j < n; ++j)
                     if (Matrix.Rows[i].Cells[j].Value != null && (Matrix.Rows[i].Cells[j].Value).ToString() == "1")
-                        draw_line1(pen, Globals.arr_circles.get_el(i), Globals.arr_circles.get_el(j));
+                        draw_line(pen, Globals.arr_circles.get_el(i), Globals.arr_circles.get_el(j));
             pictureBox1.Image = bmp;
         }
     }
@@ -329,13 +301,9 @@ namespace Laba4_algorithms
         public static Pen redline = new Pen(Color.Red,2);
         public static Pen blueline = new Pen(Color.Blue, 2);
         public static int versh = -1;//для отметки выделенности одной вершины
-        //public static int n = 0;//количество элементов в хранилище arr_circles.st
         public static SolidBrush blueBrush = new SolidBrush(Color.Blue);
         public static SolidBrush redBrush = new SolidBrush(Color.Red);
         public static Storage arr_circles = new Storage();
-        //public static Pen edge_with_arrow = new Pen(Color.Blue, 2);
-        //edge_with_arrow.StartCap = LineCap.ArrowAnchor;
-
     }
 
 
