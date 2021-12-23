@@ -27,21 +27,22 @@ namespace Laba4_algorithms
             bmp = new Bitmap(pictureBox1.Width, pictureBox1.Height);
         }
 
+        //формируем новый tmp, вынимая его из очереди
         private int new_tmp(int tmp, Queue<int> Och, List<int> Lst)
         {
-            bool fl = false;
+            bool fl = false; //есть ли в списке Lst - просмотренных вершин
             tmp = Och.Dequeue();
-            foreach (int i in Lst)
+            foreach (int i in Lst) //проверяем есть ли в списке 
             {
                 if (i == tmp) fl = true;
             }
-            if (fl && Och.Count != 0)
+            if (fl && Och.Count != 0) //если уже в списке, то формируем новый элемент
             {
                 tmp = new_tmp(tmp, Och, Lst); fl = false;
             }
             if (fl==false)
                 return tmp;
-            else return -1;
+            else return -1; //если все элементы очереди были вынуты
         }
         public static void draw_line( Pen pen, CCircle A, CCircle B)
         {
@@ -55,12 +56,14 @@ namespace Laba4_algorithms
             int num_of_edg = 0;
             int num_of_vert = n;
             for (int i = 0; i < n; ++i)
+            {
+                if (Matrix.Rows[i].Cells[i].Value != null)
+                    Matrix.Rows[i].Cells[i].Value = null;
                 for (int j = 0; j < n; ++j)
                 {
-                    if (Matrix.Rows[i].Cells[i].Value != null)
-                        Matrix.Rows[i].Cells[i].Value = null;
                     if ((Matrix.Rows[i].Cells[j].Value) != null) num_of_edg++;
                 }
+            }
             //формирование списка смежности
             int[,] adj_list = new int[num_of_edg, 2];//список смежности
             int ii = 0;
@@ -95,12 +98,13 @@ namespace Laba4_algorithms
             int tmp = st_vert;
             Och.Enqueue(tmp);
             while (Och.Count!=0 || tmp>=0)
-            {
-                for (int i = 0; i < num_of_edg; ++i)
+            {   
+                //в списке смежности ищем ребра, начинающиеся с tmp
+                for (int i = 0; i < num_of_edg; ++i)    
                 {
                     if (adj_list[i, 0] == tmp)
                     {
-                        Och.Enqueue(adj_list[i, 1]);
+                        Och.Enqueue(adj_list[i, 1]); //заносим в очерередь все смежные с tmp вершины
                     }
                 }
                 Lst.Add(tmp);//добавили в лист

@@ -29,6 +29,7 @@ namespace Laba4_algorithms
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
             this.Matrix = new System.Windows.Forms.DataGridView();
             this.Column1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
@@ -80,7 +81,7 @@ namespace Laba4_algorithms
             this.btn_clear.Name = "btn_clear";
             this.btn_clear.Size = new System.Drawing.Size(160, 36);
             this.btn_clear.TabIndex = 2;
-            this.btn_clear.Text = "Очистить";
+            this.btn_clear.Text = "Clear";
             this.btn_clear.UseVisualStyleBackColor = false;
             this.btn_clear.Click += new System.EventHandler(this.btn_clear_Click);
             // 
@@ -91,7 +92,7 @@ namespace Laba4_algorithms
             this.btn_bfs.Name = "btn_bfs";
             this.btn_bfs.Size = new System.Drawing.Size(160, 36);
             this.btn_bfs.TabIndex = 3;
-            this.btn_bfs.Text = "Поиск в ширину";
+            this.btn_bfs.Text = "Breadth search";
             this.btn_bfs.UseVisualStyleBackColor = false;
             this.btn_bfs.Click += new System.EventHandler(this.btn_bfs_Click);
             // 
@@ -125,7 +126,7 @@ namespace Laba4_algorithms
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(163, 22);
             this.label3.TabIndex = 7;
-            this.label3.Text = "Введите вершину:";
+            this.label3.Text = "Enter a vertex:";
             // 
             // Form1
             // 
@@ -141,8 +142,9 @@ namespace Laba4_algorithms
             this.Controls.Add(this.btn_clear);
             this.Controls.Add(this.pictureBox1);
             this.Controls.Add(this.Matrix);
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "Form1";
-            this.Text = "Form1";
+            this.Text = "Laboratory work №5";
             ((System.ComponentModel.ISupportInitialize)(this.Matrix)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
             this.ResumeLayout(false);
