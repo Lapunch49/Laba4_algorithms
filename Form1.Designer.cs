@@ -34,11 +34,9 @@ namespace Laba4_algorithms
             this.Column1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.btn_clear = new System.Windows.Forms.Button();
-            this.btn_bfs = new System.Windows.Forms.Button();
+            this.btn_EC = new System.Windows.Forms.Button();
             this.label1 = new System.Windows.Forms.Label();
-            this.label2 = new System.Windows.Forms.Label();
-            this.textBox1 = new System.Windows.Forms.TextBox();
-            this.label3 = new System.Windows.Forms.Label();
+            this.label = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.Matrix)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.SuspendLayout();
@@ -85,16 +83,16 @@ namespace Laba4_algorithms
             this.btn_clear.UseVisualStyleBackColor = false;
             this.btn_clear.Click += new System.EventHandler(this.btn_clear_Click);
             // 
-            // btn_bfs
+            // btn_EC
             // 
-            this.btn_bfs.BackColor = System.Drawing.SystemColors.ActiveCaption;
-            this.btn_bfs.Location = new System.Drawing.Point(595, 320);
-            this.btn_bfs.Name = "btn_bfs";
-            this.btn_bfs.Size = new System.Drawing.Size(160, 36);
-            this.btn_bfs.TabIndex = 3;
-            this.btn_bfs.Text = "Breadth search";
-            this.btn_bfs.UseVisualStyleBackColor = false;
-            this.btn_bfs.Click += new System.EventHandler(this.btn_bfs_Click);
+            this.btn_EC.BackColor = System.Drawing.SystemColors.ActiveCaption;
+            this.btn_EC.Location = new System.Drawing.Point(595, 320);
+            this.btn_EC.Name = "btn_EC";
+            this.btn_EC.Size = new System.Drawing.Size(160, 36);
+            this.btn_EC.TabIndex = 3;
+            this.btn_EC.Text = "Find an Eulerian cycle";
+            this.btn_EC.UseVisualStyleBackColor = false;
+            this.btn_EC.Click += new System.EventHandler(this.btn_EC_Click);
             // 
             // label1
             // 
@@ -104,29 +102,13 @@ namespace Laba4_algorithms
             this.label1.Size = new System.Drawing.Size(0, 20);
             this.label1.TabIndex = 4;
             // 
-            // label2
+            // label
             // 
-            this.label2.Font = new System.Drawing.Font("Segoe UI Semibold", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.label2.Location = new System.Drawing.Point(597, 421);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(157, 52);
-            this.label2.TabIndex = 5;
-            // 
-            // textBox1
-            // 
-            this.textBox1.AcceptsReturn = true;
-            this.textBox1.Location = new System.Drawing.Point(595, 391);
-            this.textBox1.Name = "textBox1";
-            this.textBox1.Size = new System.Drawing.Size(135, 27);
-            this.textBox1.TabIndex = 6;
-            // 
-            // label3
-            // 
-            this.label3.Location = new System.Drawing.Point(595, 366);
-            this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(163, 22);
-            this.label3.TabIndex = 7;
-            this.label3.Text = "Enter a vertex:";
+            this.label.Font = new System.Drawing.Font("Segoe UI Semibold", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.label.Location = new System.Drawing.Point(597, 359);
+            this.label.Name = "label";
+            this.label.Size = new System.Drawing.Size(157, 123);
+            this.label.TabIndex = 5;
             // 
             // Form1
             // 
@@ -134,17 +116,15 @@ namespace Laba4_algorithms
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.Gainsboro;
             this.ClientSize = new System.Drawing.Size(770, 533);
-            this.Controls.Add(this.label3);
-            this.Controls.Add(this.textBox1);
-            this.Controls.Add(this.label2);
+            this.Controls.Add(this.label);
             this.Controls.Add(this.label1);
-            this.Controls.Add(this.btn_bfs);
+            this.Controls.Add(this.btn_EC);
             this.Controls.Add(this.btn_clear);
             this.Controls.Add(this.pictureBox1);
             this.Controls.Add(this.Matrix);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "Form1";
-            this.Text = "Laboratory work №5";
+            this.Text = "Laboratory work №6";
             ((System.ComponentModel.ISupportInitialize)(this.Matrix)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
             this.ResumeLayout(false);
@@ -158,11 +138,9 @@ namespace Laba4_algorithms
         private System.Windows.Forms.PictureBox pictureBox1;
         private System.Windows.Forms.Button btn_clear;
         private System.Windows.Forms.DataGridViewTextBoxColumn Column1;
-        private System.Windows.Forms.Button btn_bfs;
+        private System.Windows.Forms.Button btn_EC;
         private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.Label label2;
-        private System.Windows.Forms.TextBox textBox1;
-        private System.Windows.Forms.Label label3;
+        private System.Windows.Forms.Label label;
     }
 }
 

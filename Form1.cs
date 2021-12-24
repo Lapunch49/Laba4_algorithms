@@ -33,7 +33,7 @@ namespace Laba4_algorithms
             g.DrawLine(pen, A.get_x(), A.get_y(), B.get_x(), B.get_y());
         }
 
-        private void btn_bfs_Click(object sender, EventArgs e) //BFS
+        private void btn_EC_Click(object sender, EventArgs e) //BFS
         {
             //определяем количество вершин и дуг
             int num_of_edg = 0;
@@ -62,23 +62,7 @@ namespace Laba4_algorithms
             List<int> Lst = new List<int>();
             //определяем начальную вершину
             int st_vert = 1; // По умолчанию
-            string number = textBox1.Text;
-            if (number.Length>0)
-                if(Char.IsDigit(number[0]))
-                    {
-                        st_vert = int.Parse(number[0].ToString());
-                    }
-            if (number.Length > 1)
-            {
-                if (Char.IsDigit(number[1]))
-                {
-                    st_vert = (st_vert)*10 + int.Parse(number[1].ToString());
-                } else
-                {
-                    st_vert = 1;
-                }
-            }
-            //Поиск в ширину
+            //1) Проверка - Поиск в ширину
             bool fl = false; //есть ли вершина в списке Lst
             int tmp;
             Och.Enqueue(st_vert); //заносим первый элемент в очередь
@@ -111,13 +95,81 @@ namespace Laba4_algorithms
                     }
                 }   
             }
-            //вывод листа - сформированного списка вершин
-            label2.Text = "";
-            foreach (int i in Lst)
+            if (Lst.Count() != num_of_vert)
             {
-                label2.Text += (i).ToString();
-                if (i != Lst[Lst.Count-1])
-                    label2.Text += "->";
+                label.Text += "The graph does not contain an Eulerian cycle, since the graph is disconnected";
+            }
+            else //2) проверка четности степеней всех вершин
+            {
+                //label.Text = "";
+                int cnt = 0;
+                fl = false;
+                for (int i = 0; i < num_of_vert; ++i)
+                {
+                    cnt = 0; //обнуляем счетчик
+                    for (int j = 0; j < num_of_edg; ++j)
+                    {
+                        if (adj_list[j, 0] == i)
+                            cnt++; //считаем все ребра вершины
+                    }
+                    if (cnt % 2 == 1) fl = true;
+                }
+                if (fl)
+                {
+                    label.Text = "The graph does not contain an Eulerian cycle, since not all vertices have an even degree";
+                }
+                else
+                { //3) Строим Эйлеров цикл
+                    Lst.Clear();
+                    Stack<int> stec = new Stack<int>();
+                    Stack<int> res = new Stack<int>();
+                    int vert_st = 1;
+                    int vert_end = -1;
+                    stec.Push(st_vert);
+                    while (stec.Count != 0)
+                    {
+                        vert_st = stec.Peek();
+                        fl = false;
+                        for (int i = num_of_edg - 1; i >= 0; --i)
+                            if (adj_list[i, 0] == vert_st)
+                            {
+                                vert_end = adj_list[i, 1];
+                                fl = true;
+                            }
+                        if (fl)
+                        {
+                            stec.Push(vert_end); //заносим в стек
+                            //удаляем ребра
+                            for (int i = 0; i < num_of_edg; ++i)
+                            {
+                                if (adj_list[i, 0] == vert_st && adj_list[i, 1] == vert_end)
+                                {
+                                    adj_list[i, 0] = 0;
+                                    adj_list[i, 1] = 0;
+                                }
+                                if (adj_list[i, 0] == vert_end && adj_list[i, 1] == vert_st)
+                                {
+                                    adj_list[i, 0] = 0;
+                                    adj_list[i, 1] = 0;
+                                }
+                            }
+                            vert_st = vert_end;
+                        }
+                        else
+                        {
+                            vert_st = stec.Pop();
+                            res.Push(vert_st);
+                        }
+                    }
+                    label.Text = "";
+                    int iii = 1;
+                    while (res.Count != 0)
+                    {
+                        label.Text += (res.Pop()).ToString();
+                        if (iii++ != (num_of_edg/2+1))
+                            label.Text += "-";
+                    }
+                }
             }
         }
         private void pictureBox1_MouseDown(object sender, MouseEventArgs e)
@@ -194,10 +246,6 @@ namespace Laba4_algorithms
             arr_circles.set_count_to_zero();
             pictureBox1.Image = null;
             bmp = new Bitmap(pictureBox1.Width, pictureBox1.Height);
-            //очищаем таблицу - стираем все значения в матрице
-            //for (int i = 0; i < n; ++i)
-            //    for (int j = 0; j < n; ++j)
-            //        Matrix.Rows[i].Cells[j].Value = "";
             //удаляем все колонки и столбцы
             Matrix.Rows.Clear();
             Matrix.Columns.Clear();
@@ -205,8 +253,7 @@ namespace Laba4_algorithms
             Matrix.Columns.Add(0.ToString(), 1.ToString());
             Matrix.Columns[0].Width = 70;  //задаем размер новому столбцу
             //очищаем поле ввода и вывода
-            textBox1.Text = "";
-            label2.Text = "";
+            label.Text = "";
         }
 
         private void pictureBox1_Paint(object sender, PaintEventArgs e)
